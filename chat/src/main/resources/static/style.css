@@ -364,17 +364,17 @@ textarea:focus {
     display: block;  /* 塊級元素顯示 */
     bottom: 0px;  /* 距離底部距離為0px */
     right: 0px;  /* 距離右側距離為0px */
-    width: 8%;  /* 寬度為8% */
+    width: 4%;  /* 寬度為8% */
     height: 50px;  /* 高度為50px */
     border: none;  /* 無邊框 */
     outline: none;  /* 無外框 */
     z-index: 100;  /* 層級為100 */
     cursor: pointer;  /* 游標設定為指示 */
-    background-image: url(https://i.imgur.com/VSQxJKL.png);  /* 背景圖片網址 */
+      /* 背景圖片網址 */
     background-repeat: no-repeat;  /* 不重複重複 */
     background-size: 34px 34px;  /* 背景圖片大小為34px x 34px */
     background-position: 45% 9px;  /* 背景圖片位置 */
-    background-color: rgba(255,255,255,0);  /* 背景顏色為透明 */
+    background-color: rgb(0, 0, 0);  /* 背景顏色為透明 */
 }
 
 .send:active {
