@@ -6,7 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css"  href="style.css">
   <link rel="stylesheet" type="text/css"  href="muen.css">
-  <title>Document</title>
+  <!-- 引入axios套件，用來透過HTTP協定在網頁內呼叫後端的API -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- 引入Vue.js -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <title>隨機聊天室</title>
 </head>
 <body>
     <input type="checkbox" id="active">
@@ -47,4 +51,74 @@
 <form><textarea type="text" placeholder="Say something"></textarea><input type="submit" class="send" value=""/></form>
 </div>
 </body>
+<script lang="javascript">
+
+	const {createApp} = Vue
+	//建立vue物件
+	createApp({
+	   data() {
+		 // 這裡出現的變數才可以在網頁內使用
+		 return {
+		   showWarning: false, // 開關警告訊息用
+		   username:'', //存放使用者帳號
+		   password:'', //存放使用者密碼
+		 }
+	   },
+	   
+	   //新增watch方法
+	   watch: {
+		   // 監看username變數
+		   username(newVal,oldVal){
+			   //當帳號名稱已不再有特殊字元時，停止顯示警告訊息
+			   
+			   var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+			   if(!pattern.test(newVal))
+				  this.showWarning = false;
+		   }
+	   },
+
+	   //vue 的方法放這裡
+	   methods: {
+		   
+		   
+		   
+		   //檢查帳號有沒有包含不允許的字元
+		   checkAccount(){
+			   console.log('checkAccount');
+		   /*if(this.username.includes('\'')==true)
+				this.showWarning = true;*/
+
+		   // 如果帳號名稱出現特殊字元，顯示警告訊息
+		    
+		    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>《》\\/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+			if (pattern.test(this.username)) {
+    		this.showWarning = true;
+			} else {
+			  //取代 document.getElementById
+			  //送出表單
+			  //this.$refs.form.submit();
+
+			  //打API
+			  axios.get("/login?username=" + this.username + "&password=" + this.password)
+			  .then((response) => {
+			   //get完成後收到的資料在這裡處理
+			   console.log(response);
+
+			   if(response.data.code == 0) //登入成功
+				  location.href = '/card.html';
+			   else //登入失敗
+				  location.href = "loginResult.html?message=" +response.data.message;
+			  })
+			  .catch( (error) => {
+			   console.log(error);
+			  });
+		   }
+		 }  
+	   }
+   }).mount('#app');
+
+
+
+
+</script>
 </html>
