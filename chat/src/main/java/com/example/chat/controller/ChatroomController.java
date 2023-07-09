@@ -13,17 +13,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.uch.finalproject.model.FoodEntitly;
-import com.uch.finalproject.model.FoodResponse;
+import com.example.chat.model.ChatEntitly;
+import com.example.chat.model.ChatResponse;
 
 @RestController
 public class ChatroomController {
-    @RequestMapping(value = "/foods", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public FoodResponse foods() {
-        return getFoodList();
+    private static final ArrayList<ChatEntitly> chats = null;
+
+    @RequestMapping(value = "/chats", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ChatResponse chats() {
+        return getChatList();
     }
 
-    private FoodResponse getFoodList() {
+    private ChatResponse getChatList() {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -40,24 +42,19 @@ public class ChatroomController {
             rs = stmt.executeQuery(
                     "select fd.id, name, category, buy_date, exp_date, quantity  from foods f join food_detail fd where f.food_id = fd.id;");
 
-            ArrayList<ChatEntitly> foods = new ArrayList<>();
+            ArrayList<ChatEntitly> s = new ArrayList<>();
             while (rs.next()) {
-                ChatEntitly foodEntitly = new ChatEntitly();
-                foodEntitly.setId(rs.getInt("id"));
-                foodEntitly.setName(rs.getString("name"));
-                foodEntitly.setCategory(rs.getString("category"));
-                foodEntitly.setBuyDate(rs.getDate("buy_date"));
-                foodEntitly.setExpDate(rs.getDate("exp_date"));
-                foodEntitly.setQuantity(rs.getInt("quantity"));
+                ChatEntitly chatEntitly = new ChatEntitly();
+                chatEntitly.setId(rs.getInt("id"));
 
-                foods.add(foodEntitly);
+                chats.add(chatEntitly);
             }
 
-            return new FoodResponse(0, "成功", foods);
+            return new ChatResponse(0, "成功", chats);
         } catch (SQLException e) {
-            return new FoodResponse(e.getErrorCode(), e.getMessage(), null);
+            return new ChatResponse(e.getErrorCode(), e.getMessage(), null);
         } catch (ClassNotFoundException e) {
-            return new FoodResponse(1, "無法註冊驅動程式", null);
+            return new ChatResponse(1, "無法註冊驅動程式", null);
         }
     }
 }
