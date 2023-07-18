@@ -83,6 +83,26 @@
 
 	   //vue 的方法放這裡
 	  methods: {
+      match() {
+        fetch("/api/match", {
+          method: "POST",
+        })
+        .then(response => {
+          if (response.ok) {
+            return response.text(); // 獲取配對到的 ID
+          } else {
+            throw new Error("Failed to match.");
+          }
+        })
+        .then(matchedId => {
+          // 進行配對後的處理
+          console.log("Matched ID:", matchedId);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+      }
+    },
       sendMessage() {
         // 按下發送按鈕時觸發的方法
         if (this.newMessage.trim() !== "") {
@@ -95,7 +115,6 @@
         }
       }
       
-    }
    }).mount('#app');
 
 
