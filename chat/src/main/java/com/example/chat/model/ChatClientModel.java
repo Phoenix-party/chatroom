@@ -1,14 +1,17 @@
 package com.example.chat.model;
 
 public class ChatClientModel {
-    private String Clientname;
+    private String message;
 
-    public String getClientname() {
-        return Clientname;
+    
+
+    public String getMessage() {
+        return message;
     }
 
-    public void setClientname(String clientname) {
-        Clientname = clientname;
+    public void setMessage(String message) {
+        this.message = message;
     }
-
 }
+
+
