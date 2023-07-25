@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css"  href="style.css">
   <link rel="stylesheet" type="text/css"  href="muen.css">
@@ -59,8 +59,10 @@
     <form>
       <textarea type="text" placeholder="Say something" v-model="newMessage" @keydown.enter.prevent="sendMessage">
       </textarea>
-<input type="submit" class="send" value="" @click="sendMessage" />
+      <input type="submit" class="send" value="" @click="sendMessage($event)" />
     </form>
+  </div>
+</div>
 </body>
 <script lang="javascript">
 
@@ -68,7 +70,6 @@
 	//建立vue物件
 	createApp({
 	    data() {
-        el: '#app'
 		 // 這裡出現的變數才可以在網頁內使用
 		  return {
 		   showWarning: false, // 開關警告訊息用
@@ -101,20 +102,21 @@
         .catch(error => {
           console.error(error);
         });
+      },
+      sendMessage(event) {
+      event.preventDefault(); // 阻止表單提交的預設行為
+    
+      if (this.newMessage.trim() !== "") {
+        this.messages.push({
+          sender: "self",
+          content: this.newMessage,
+          timestamp: new Date().toLocaleTimeString() // 添加時間戳記
+        });
+        this.newMessage = ""; // 清空輸入框
       }
+    }
     },
-      sendMessage() {
-        // 按下發送按鈕時觸發的方法
-        if (this.newMessage.trim() !== "") {
-          this.messages.push({
-            sender: "self",
-            content: this.newMessage,
-            timestamp: new Date().toLocaleTimeString() // 添加時間戳記
-          });
-          this.newMessage = ""; // 清空輸入框
-        }
-      }
-      
+    
    }).mount('#app');
 
 

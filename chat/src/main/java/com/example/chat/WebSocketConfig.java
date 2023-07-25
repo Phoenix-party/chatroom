@@ -34,6 +34,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public TaskScheduler taskScheduler() {
         return new ConcurrentTaskScheduler();
     }
-
-   
 }
