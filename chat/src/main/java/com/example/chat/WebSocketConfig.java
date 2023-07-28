@@ -35,3 +35,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         return new ConcurrentTaskScheduler();
     }
 }
+//可使用版本
