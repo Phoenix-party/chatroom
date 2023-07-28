@@ -29,7 +29,9 @@
   <a href="#" class="back"><i class="fa fa-angle-left"></i></a>
   <div class="name">Random chat</div>
 <div class="members"><b>You</div>
+
 </div>
+<button @click="matchUsers">連接</button>
 <ol class="chat">
 <li class="other">
 <div class="msg">
@@ -74,7 +76,8 @@
 		  return {
 		   showWarning: false, // 開關警告訊息用
        messages: [], // 存儲聊天消息的數組
-       newMessage: "" // 用於綁定輸入框的值
+       newMessage: "", // 用於綁定輸入框的值
+       result: ""
 		}
 	},
 	   //新增watch方法
@@ -84,25 +87,23 @@
 
 	   //vue 的方法放這裡
 	  methods: {
-      match() {
-        fetch("/api/match", {
-          method: "POST",
-        })
+      matchUsers() {
+      // 發送POST請求到後端的隨機配對API
+      console.log("我點下了按鈕");
+      axios.post('/chat/match')
         .then(response => {
-          if (response.ok) {
-            return response.text(); // 獲取配對到的 ID
+          // 在前端處理後端回傳的數據
+          if (response.data.success) {
+            this.result = `用戶 ${response.data.user1Id} 和用戶 ${response.data.user2Id} 成功匹配，可以進行匿名聊天！`;
           } else {
-            throw new Error("Failed to match.");
+            this.result = '目前找不到足夠的用戶進行配對，請稍後再試。';
           }
         })
-        .then(matchedId => {
-          // 進行配對後的處理
-          console.log("Matched ID:", matchedId);
-        })
         .catch(error => {
-          console.error(error);
+          console.error('錯誤:', error);
+          this.result = '發生錯誤，請稍後再試。';
         });
-      },
+    },
       sendMessage(event) {
       event.preventDefault(); // 阻止表單提交的預設行為
     

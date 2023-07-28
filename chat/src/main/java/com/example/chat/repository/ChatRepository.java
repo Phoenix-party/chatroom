@@ -10,18 +10,6 @@ import org.springframework.stereotype.Repository;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 @Repository
 public class ChatRepository extends BaseRepository {
     // @Autowired
