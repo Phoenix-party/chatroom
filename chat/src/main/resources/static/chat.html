@@ -88,22 +88,26 @@
 	   //vue 的方法放這裡
 	  methods: {
       matchUsers() {
-      // 發送POST請求到後端的隨機配對API
-      console.log("我點下了按鈕");
-      axios.post('/chat/match')
-        .then(response => {
-          // 在前端處理後端回傳的數據
-          if (response.data.success) {
-            this.result = `用戶 ${response.data.user1Id} 和用戶 ${response.data.user2Id} 成功匹配，可以進行匿名聊天！`;
-          } else {
-            this.result = '目前找不到足夠的用戶進行配對，請稍後再試。';
-          }
-        })
-        .catch(error => {
-          console.error('錯誤:', error);
-          this.result = '發生錯誤，請稍後再試。';
-        });
-    },
+        this.showWarning = true; // 顯示提示訊息，表示正在等待配對
+        // 發送POST請求到後端的隨機配對API
+        console.log("我點下了按鈕");
+        axios.post('/chat/match')
+          .then(response => {
+            // 在前端處理後端回傳的數據
+            if (response.data.success) {
+              this.result = `用戶 ${response.data.user1Id} 和用戶 ${response.data.user2Id} 成功匹配，可以進行匿名聊天！`;
+            } else {
+              this.result = '目前找不到足夠的用戶進行配對，請稍後再試。';
+            }
+          })
+          .catch(error => {
+            console.error('錯誤:', error);
+            this.result = '發生錯誤，請稍後再試。';
+          })
+          .finally(() => {
+            this.showWarning = false; // 配對完成或出現錯誤時，關閉提示訊息
+          });
+      },
       sendMessage(event) {
       event.preventDefault(); // 阻止表單提交的預設行為
     
