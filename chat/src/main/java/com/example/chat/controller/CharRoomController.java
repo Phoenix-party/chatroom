@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 @Controller
+
 public class CharRoomController {
     @MessageMapping("/messageControl")
     @CrossOrigin(value = "*")
