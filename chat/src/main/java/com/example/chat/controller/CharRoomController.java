@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 
+
 @Controller
 public class CharRoomController {
 @MessageMapping("/messageControl")
@@ -18,5 +19,10 @@ public ServerResponseModel said(ChatClientModel request) throws InterruptedExcep
     String responseMessage =  request.getMessage();
     return new ServerResponseModel(responseMessage);
 }
-
+@MessageMapping("/heartbeat")
+@CrossOrigin(value = "*") // 允許跨域請求
+public void handleHeartbeat() {
+    // 當收到心跳訊號時，你可以在這裡處理相應的邏輯，例如更新使用者的心跳時間等操作
 }
+}
+

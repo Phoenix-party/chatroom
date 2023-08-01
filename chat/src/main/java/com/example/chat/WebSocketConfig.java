@@ -15,8 +15,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @CrossOrigin(value = "*")
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private static long HEART_BEAT=10000;
-    
+    private static long HEART_BEAT = 10000;
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // 配置消息代理
@@ -37,4 +37,3 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         return new ConcurrentTaskScheduler();
     }
 }
-//可使用版本
