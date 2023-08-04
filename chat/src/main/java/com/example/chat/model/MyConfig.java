@@ -32,4 +32,25 @@ public class MyConfig {
         }
         return null;
     }
+
+    // Getter 方法
+    public String getUsername() {
+        return username;
+    }
+
+    // Setter 方法 (如果需要的話)
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    public String getPassword() {
+        return password;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getDriverClassName() {
+        return driverClassName;
+    }
 }

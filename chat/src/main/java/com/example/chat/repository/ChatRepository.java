@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 
 
 
+
+
 @Repository
 public class ChatRepository extends BaseRepository {
     // @Autowired
@@ -35,7 +37,7 @@ public class ChatRepository extends BaseRepository {
                     a.setSenderMessage(rs.getString("sendermessage"));
                     a.setSenderTimestamp(rs.getDate("sendertimestamp"));
                     a.setReceiverId(rs.getInt("receiverid"));
-                    a.setRceiverMessage(rs.getString("receivermessage"));
+                    a.setReceiverMessage(rs.getString("receivermessage"));
                     a.setReceiverTimestamp(rs.getDate("receivertimestamp"));
 
                     data.add(a);
