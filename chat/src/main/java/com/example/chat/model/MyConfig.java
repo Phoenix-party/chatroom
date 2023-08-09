@@ -3,12 +3,18 @@ package com.example.chat.model;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
 
+
+
+
+
 @Component
+@Data
 public class MyConfig {
     @Value("${spring.datasource.url}")
     private String url;

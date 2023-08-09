@@ -1,11 +1,16 @@
 package com.example.chat.repository;
 
 import com.example.chat.model.ChatMessageModel;
+import com.example.chat.model.MyConfig;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+
+
 
 
 
@@ -14,8 +19,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class ChatRepository extends BaseRepository {
-    // @Autowired
-    // private MyConfig myConfig;
+     @Autowired
+     private MyConfig myConfig;
     
     public ArrayList<ChatMessageModel> findAll() {
         super.init();
@@ -24,7 +29,7 @@ public class ChatRepository extends BaseRepository {
         {
             try {
                 Statement stmt = getConnection().createStatement(); 
-                ResultSet rs = stmt.executeQuery("SELECT * FROM articles");
+                ResultSet rs = stmt.executeQuery("SELECT * FROM chat_records");
 
                 ArrayList<ChatMessageModel> data = new ArrayList<>();
             
