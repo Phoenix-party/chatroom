@@ -1,19 +1,40 @@
 package com.example.chat.Service;
 
+import com.example.chat.controller.ChatRoom;
 import com.example.chat.model.MyConfig;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.WebSocketSession;
+
+
+
 
 
 
 @Service
 public class RandomChatRoomService {
+    
+    private Map<String, ChatRoom> chatRooms = new HashMap<>();
 
     @Autowired
-    private MyConfig myConfig; // 注入MyConfig
+    private MyConfig myConfig; // 注入 MyConfig
+
+    // 生成隨機 WebSocket ID
+    public String generateWebSocketId() {
+        return UUID.randomUUID().toString();
+    }
 
     // 隨機配對功能
-    public void matchUsers(String cookieID, String webSocketID) {
+    public String matchUsers(String cookieID, WebSocketSession session) {
+        String webSocketID = generateWebSocketId();
+
         // 將使用者的 WebSocket ID 和 Cookie ID 關聯存入資料庫的 user_connections 表
         addUserConnection(cookieID, webSocketID);
 
@@ -21,28 +42,63 @@ public class RandomChatRoomService {
         String matchedWebSocketID = getMatchedWebSocketID(cookieID);
 
         if (matchedWebSocketID != null) {
-            // 找到匹配的使用者，建立連接，並刪除配對資料
+            // 找到匹配的使用者，建立連接，創建聊天室並維護連接列表
             addUserConnection(matchedWebSocketID, webSocketID);
             removeMatchedUser(matchedWebSocketID);
             removeMatchedUser(cookieID);
 
-            // 在這裡執行將用戶進行匿名聊天的相關邏輯
-            System.out.println("用戶 " + cookieID + " 和用戶 " + matchedWebSocketID + " 成功匹配，可以進行匿名聊天！");
+            // 在這裡進行將使用者進行匿名聊天的相關邏輯
+            ChatRoom chatRoom = new ChatRoom(webSocketID);
+            chatRoom.getSessions().add(session); // 將目前使用者的連接加入聊天室的連接列表中
+            chatRooms.put(webSocketID, chatRoom); // 將聊天室加入chatRooms列表中
+
+            System.out.println("使用者 " + cookieID + " 和使用者 " + matchedWebSocketID + " 成功匹配，可以進行匿名聊天！");
+            return webSocketID; // 回傳生成的 WebSocket ID
         } else {
-            System.out.println("目前找不到足夠的用戶進行配對，請稍後再試。");
+            System.out.println("目前找不到足夠的使用者進行配對，請稍後再試。");
+            return null;
         }
     }
 
     private void addUserConnection(String cookieID, String webSocketID) {
-        // 在這裡執行將 cookieID 和 webSocketID 儲存到 user_connections 資料表的邏輯
+        try (Connection connection = myConfig.getConnection()) {
+            String sql = "INSERT INTO user_connections (cookie_id, websocket_id) VALUES (?, ?)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, cookieID);
+                preparedStatement.setString(2, webSocketID);
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private String getMatchedWebSocketID(String cookieID) {
-        // 在這裡執行查詢 user_connections 資料表的邏輯，找到匹配的使用者的 WebSocket ID
+        try (Connection connection = myConfig.getConnection()) {
+            String sql = "SELECT websocket_id FROM user_connections WHERE cookie_id <> ? AND websocket_id IS NULL LIMIT 1";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, cookieID);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getString("websocket_id");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     public void removeMatchedUser(String cookieID) {
-        // 在這裡執行刪除 user_connections 資料表中特定 cookieID 的資料的邏輯
+        try (Connection connection = myConfig.getConnection()) {
+            String sql = "DELETE FROM user_connections WHERE cookie_id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, cookieID);
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

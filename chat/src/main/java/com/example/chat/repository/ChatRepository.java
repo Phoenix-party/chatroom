@@ -1,6 +1,6 @@
 package com.example.chat.repository;
 
-import com.example.chat.model.ChatMessageModel;
+import com.example.chat.model.MatchUserModel;
 import com.example.chat.model.MyConfig;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,36 +15,29 @@ import org.springframework.stereotype.Repository;
 
 
 
-
-
 @Repository
 public class ChatRepository extends BaseRepository {
      @Autowired
      private MyConfig myConfig;
     
-    public ArrayList<ChatMessageModel> findAll() {
+    public ArrayList<MatchUserModel> findAll() {
         super.init();
 
         if(getConnection() != null) // 確定有連線成功
         {
             try {
                 Statement stmt = getConnection().createStatement(); 
-                ResultSet rs = stmt.executeQuery("SELECT * FROM chat_records");
+                ResultSet rs = stmt.executeQuery("SELECT * FROM user_connections");
 
-                ArrayList<ChatMessageModel> data = new ArrayList<>();
+                ArrayList<MatchUserModel> data = new ArrayList<>();
             
-                // 取得每一筆文章資訊
+                
                 while(rs.next()) {
-                    ChatMessageModel a = new ChatMessageModel();
+                    MatchUserModel a = new MatchUserModel();
                     a.setId(rs.getInt("id"));  // id欄位名稱必須和資料庫蘭為名稱一致
-                    a.setRoomId(rs.getInt("roomid"));
-                    a.setSenderId(rs.getInt("senderid"));
-                    a.setSenderMessage(rs.getString("sendermessage"));
-                    a.setSenderTimestamp(rs.getDate("sendertimestamp"));
-                    a.setReceiverId(rs.getInt("receiverid"));
-                    a.setReceiverMessage(rs.getString("receivermessage"));
-                    a.setReceiverTimestamp(rs.getDate("receivertimestamp"));
-
+                    a.setCookieId(rs.getString("cookie_id"));
+                    a.setWebsocketId(rs.getString("websocket_id"));
+                    
                     data.add(a);
                 }
 

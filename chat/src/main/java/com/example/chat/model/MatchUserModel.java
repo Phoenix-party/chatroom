@@ -20,8 +20,8 @@ public class MatchUserModel {
         return CookieId;
     }
   
-    public void setCookidId(String CookidId) {
-        this.CookieId = CookidId;
+    public void setCookieId(String CookieId) {
+        this.CookieId = CookieId;
     }
   
     public String getWebsocketId() {
