@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.WebSocketSession;
+
 
 
 
@@ -22,6 +22,7 @@ import org.springframework.web.socket.WebSocketSession;
 public class RandomChatRoomService {
     
     private Map<String, ChatRoom> chatRooms = new HashMap<>();
+    private Map<String, Object> matchLocks = new HashMap<>();
 
     @Autowired
     private MyConfig myConfig; // 注入 MyConfig
@@ -32,7 +33,7 @@ public class RandomChatRoomService {
     }
 
     // 隨機配對功能
-    public String matchUsers(String cookieID, WebSocketSession session) {
+    public String matchUsers(String cookieID) {
         String webSocketID = generateWebSocketId();
 
         // 將使用者的 WebSocket ID 和 Cookie ID 關聯存入資料庫的 user_connections 表
@@ -49,14 +50,34 @@ public class RandomChatRoomService {
 
             // 在這裡進行將使用者進行匿名聊天的相關邏輯
             ChatRoom chatRoom = new ChatRoom(webSocketID);
-            chatRoom.getSessions().add(session); // 將目前使用者的連接加入聊天室的連接列表中
             chatRooms.put(webSocketID, chatRoom); // 將聊天室加入chatRooms列表中
 
             System.out.println("使用者 " + cookieID + " 和使用者 " + matchedWebSocketID + " 成功匹配，可以進行匿名聊天！");
+
+            // 通知等待中的线程
+            synchronized (matchLocks.get(matchedWebSocketID)) {
+                matchLocks.get(matchedWebSocketID).notify();
+            }
+
             return webSocketID; // 回傳生成的 WebSocket ID
         } else {
             System.out.println("目前找不到足夠的使用者進行配對，請稍後再試。");
-            return null;
+
+            // 创建锁对象，用于等待匹配成功
+            Object lock = new Object();
+            matchLocks.put(cookieID, lock);
+
+            // 等待匹配成功
+            synchronized (lock) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // 匹配成功后继续处理
+            return webSocketID;
         }
     }
 

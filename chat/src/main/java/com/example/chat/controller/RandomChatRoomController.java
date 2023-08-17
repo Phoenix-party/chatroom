@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.socket.WebSocketSession;
 
 
 
@@ -23,8 +22,8 @@ public class RandomChatRoomController {
 
     @PostMapping("/chat/match")
     @CrossOrigin(value = "*")
-    public ResponseEntity<String> matchUsers(@RequestParam String cookieID, WebSocketSession session) {
-        String webSocketID = randomChatRoomService.matchUsers(cookieID, session);
+    public ResponseEntity<String> matchUsers(@RequestParam String cookieID) {
+        String webSocketID = randomChatRoomService.matchUsers(cookieID);
 
         if (webSocketID != null) {
             ChatRoom chatRoom = new ChatRoom(webSocketID);
@@ -42,5 +41,3 @@ public class RandomChatRoomController {
         return ResponseEntity.ok("已斷開連接，資料已刪除。");
     }
 }
-
-
