@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 
+
+
+
+
 @RestController
 public class RandomChatRoomController {
 
@@ -28,7 +32,7 @@ public class RandomChatRoomController {
         if (webSocketID != null) {
             ChatRoom chatRoom = new ChatRoom(webSocketID);
             chatRooms.put(webSocketID, chatRoom);
-            return ResponseEntity.ok("已發起配對請求，請等待匹配結果。WebSocket ID：" + webSocketID);
+            return ResponseEntity.ok(webSocketID);
         } else {
             return ResponseEntity.badRequest().body("無法發起配對請求，請稍後再試。");
         }

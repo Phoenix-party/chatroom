@@ -14,10 +14,6 @@ import org.springframework.stereotype.Service;
 
 
 
-
-
-
-
 @Service
 public class RandomChatRoomService {
     
@@ -52,11 +48,15 @@ public class RandomChatRoomService {
             ChatRoom chatRoom = new ChatRoom(webSocketID);
             chatRooms.put(webSocketID, chatRoom); // 將聊天室加入chatRooms列表中
 
-            System.out.println("使用者 " + cookieID + " 和使用者 " + matchedWebSocketID + " 成功匹配，可以進行匿名聊天！");
+            System.out.println("以和使用者 " + cookieID + " 成功匹配，可以進行匿名聊天！");
 
             // 通知等待中的线程
-            synchronized (matchLocks.get(matchedWebSocketID)) {
-                matchLocks.get(matchedWebSocketID).notify();
+            synchronized (matchLocks) {
+                if (matchedWebSocketID != null && matchLocks.containsKey(matchedWebSocketID)) {
+                    synchronized (matchLocks.get(matchedWebSocketID)) {
+                        matchLocks.get(matchedWebSocketID).notify();
+                    }
+                }
             }
 
             return webSocketID; // 回傳生成的 WebSocket ID
@@ -96,7 +96,7 @@ public class RandomChatRoomService {
 
     private String getMatchedWebSocketID(String cookieID) {
         try (Connection connection = myConfig.getConnection()) {
-            String sql = "SELECT websocket_id FROM user_connections WHERE cookie_id <> ? AND websocket_id IS NULL LIMIT 1";
+            String sql = "SELECT websocket_id FROM user_connections WHERE websocket_id IS NOT NULL AND cookie_id <> ? ORDER BY RAND() LIMIT 1";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, cookieID);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
