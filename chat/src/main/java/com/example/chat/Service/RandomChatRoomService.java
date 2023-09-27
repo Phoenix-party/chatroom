@@ -14,6 +14,18 @@ import org.springframework.stereotype.Service;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 @Service
 public class RandomChatRoomService {
     
@@ -31,25 +43,27 @@ public class RandomChatRoomService {
     // 隨機配對功能
     public String matchUsers(String cookieID) {
         String webSocketID = generateWebSocketId();
-
+    
         // 將使用者的 WebSocket ID 和 Cookie ID 關聯存入資料庫的 user_connections 表
         addUserConnection(cookieID, webSocketID);
-
+    
         // 查詢資料庫，尋找與目前使用者不同且未被匹配的使用者
         String matchedWebSocketID = getMatchedWebSocketID(cookieID);
-
+    
         if (matchedWebSocketID != null) {
             // 找到匹配的使用者，建立連接，創建聊天室並維護連接列表
             addUserConnection(matchedWebSocketID, webSocketID);
-            removeMatchedUser(matchedWebSocketID);
-            removeMatchedUser(cookieID);
-
+    
             // 在這裡進行將使用者進行匿名聊天的相關邏輯
             ChatRoom chatRoom = new ChatRoom(webSocketID);
             chatRooms.put(webSocketID, chatRoom); // 將聊天室加入chatRooms列表中
-
+    
             System.out.println("以和使用者 " + cookieID + " 成功匹配，可以進行匿名聊天！");
+    
+            // 在匹配成功后，删除两个用户的记录
+            removeMatchedUsers(matchedWebSocketID, webSocketID);
 
+    
             // 通知等待中的线程
             synchronized (matchLocks) {
                 if (matchedWebSocketID != null && matchLocks.containsKey(matchedWebSocketID)) {
@@ -58,15 +72,14 @@ public class RandomChatRoomService {
                     }
                 }
             }
-
+    
             return webSocketID; // 回傳生成的 WebSocket ID
         } else {
-            System.out.println("目前找不到足夠的使用者進行配對，請稍後再試。");
-
+            // 如果無法找到匹配的使用者，則等待匹配成功
             // 创建锁对象，用于等待匹配成功
             Object lock = new Object();
             matchLocks.put(cookieID, lock);
-
+    
             // 等待匹配成功
             synchronized (lock) {
                 try {
@@ -75,24 +88,47 @@ public class RandomChatRoomService {
                     e.printStackTrace();
                 }
             }
-
+    
             // 匹配成功后继续处理
             return webSocketID;
         }
     }
+    
 
     private void addUserConnection(String cookieID, String webSocketID) {
         try (Connection connection = myConfig.getConnection()) {
-            String sql = "INSERT INTO user_connections (cookie_id, websocket_id) VALUES (?, ?)";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.setString(1, cookieID);
-                preparedStatement.setString(2, webSocketID);
-                preparedStatement.executeUpdate();
+            // 檢查是否已經存在相同的 websocket_id
+            if (!isWebSocketIdExists(connection, webSocketID)) {
+                String sql = "INSERT INTO user_connections (cookie_id, websocket_id) VALUES (?, ?)";
+                try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                    preparedStatement.setString(1, cookieID);
+                    preparedStatement.setString(2, webSocketID);
+                    preparedStatement.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+    
+    private boolean isWebSocketIdExists(Connection connection, String webSocketID) {
+        try {
+            String sql = "SELECT COUNT(*) FROM user_connections WHERE websocket_id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, webSocketID);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int count = resultSet.getInt(1);
+                        return count > 0;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
 
     private String getMatchedWebSocketID(String cookieID) {
         try (Connection connection = myConfig.getConnection()) {
@@ -111,15 +147,19 @@ public class RandomChatRoomService {
         return null;
     }
 
-    public void removeMatchedUser(String cookieID) {
+    public void removeMatchedUsers(String websocketID1, String websocketID2) {
         try (Connection connection = myConfig.getConnection()) {
-            String sql = "DELETE FROM user_connections WHERE cookie_id = ?";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.setString(1, cookieID);
-                preparedStatement.executeUpdate();
+            if (connection != null) { // 確保連接有效
+                String sql = "DELETE FROM user_connections WHERE websocket_id IN (?, ?)";
+                try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                    preparedStatement.setString(1, websocketID1);
+                    preparedStatement.setString(2, websocketID2);
+                    preparedStatement.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+    
 }
