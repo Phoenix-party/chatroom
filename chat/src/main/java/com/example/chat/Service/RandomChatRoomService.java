@@ -13,19 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 @Service
 public class RandomChatRoomService {
     
@@ -61,7 +48,7 @@ public class RandomChatRoomService {
             System.out.println("以和使用者 " + cookieID + " 成功匹配，可以進行匿名聊天！");
     
             // 在匹配成功后，删除两个用户的记录
-            removeMatchedUsers(matchedWebSocketID, webSocketID);
+            removeMatchedUser(webSocketID);
 
     
             // 通知等待中的线程
@@ -147,13 +134,12 @@ public class RandomChatRoomService {
         return null;
     }
 
-    public void removeMatchedUsers(String websocketID1, String websocketID2) {
+    public void removeMatchedUser(String websocketID) {
         try (Connection connection = myConfig.getConnection()) {
-            if (connection != null) { // 確保連接有效
-                String sql = "DELETE FROM user_connections WHERE websocket_id IN (?, ?)";
+            if (connection != null) { // 确保连接有效
+                String sql = "DELETE FROM user_connections WHERE websocket_id = ?";
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                    preparedStatement.setString(1, websocketID1);
-                    preparedStatement.setString(2, websocketID2);
+                    preparedStatement.setString(1, websocketID);
                     preparedStatement.executeUpdate();
                 }
             }
@@ -161,5 +147,6 @@ public class RandomChatRoomService {
             e.printStackTrace();
         }
     }
+    
     
 }

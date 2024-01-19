@@ -41,7 +41,7 @@ public class RandomChatRoomController {
     @PostMapping("/chat/disconnect")
     @CrossOrigin(value = "*")
     public ResponseEntity<String> disconnectUser(@RequestParam String cookieID) {
-        randomChatRoomService.removeMatchedUser(cookieID);
-        return ResponseEntity.ok("已斷開連接，資料已刪除。");
-    }
+    randomChatRoomService.removeMatchedUser(cookieID);
+    return ResponseEntity.ok("已斷開連接，資料已刪除。");
+}
 }
