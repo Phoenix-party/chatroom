@@ -1,20 +1,15 @@
 package com.example.chat.controller;
 
 import com.example.chat.Service.RandomChatRoomService;
-import java.util.HashMap;
-import java.util.Map;
+import com.example.chat.controller.ChatRoom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-
-
-
-
-
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class RandomChatRoomController {
@@ -41,7 +36,13 @@ public class RandomChatRoomController {
     @PostMapping("/chat/disconnect")
     @CrossOrigin(value = "*")
     public ResponseEntity<String> disconnectUser(@RequestParam String cookieID) {
-    randomChatRoomService.removeMatchedUser(cookieID);
-    return ResponseEntity.ok("已斷開連接，資料已刪除。");
-}
+        String webSocketID = randomChatRoomService.findWebSocketIdByCookieId(cookieID);
+
+        if (webSocketID != null) {
+            randomChatRoomService.removeMatchedUsers(cookieID, webSocketID);
+            return ResponseEntity.ok("已斷開連接，資料已刪除。");
+        } else {
+            return ResponseEntity.badRequest().body("找不到匹配的WebSocket ID，無法斷開連接。");
+        }
+    }
 }
